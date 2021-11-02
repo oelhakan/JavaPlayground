@@ -1,5 +1,3 @@
-package Playground.DragAndDrop;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,6 +11,7 @@ public class DragPanel extends JPanel {
     final int HEIGHT = image.getIconHeight();
     Point imageCorner;
     Point previousPoint;
+    boolean dragValid = false;
 
     DragPanel() {
 
@@ -24,7 +23,6 @@ public class DragPanel extends JPanel {
 
         this.addMouseListener(clickListener);
         this.addMouseMotionListener(dragListener);
-
     }
 
     public void paintComponent(Graphics g) {
@@ -32,20 +30,29 @@ public class DragPanel extends JPanel {
         image.paintIcon(this, g, (int) imageCorner.getX(), (int) imageCorner.getY());
     }
 
-    private class ClickListener extends MouseAdapter {
-        public void MousePressed(MouseEvent e) {
-            previousPoint.equals(e.getPoint());
+    private class ClickListener extends MouseAdapter{
+        public void mousePressed(MouseEvent e) {
+            previousPoint = e.getPoint();
+            dragValid = (e.getPoint().getX() > imageCorner.getX()) &&
+                    (e.getPoint().getX() < (imageCorner.getX() + WIDTH)) &&
+                    (e.getPoint().getY() > imageCorner.getY()) &&
+                    (e.getPoint().getY() < (imageCorner.getY() + HEIGHT));
         }
     }
 
-    private class DragListener extends MouseMotionAdapter {
-        public void MouseDragged(MouseEvent e) {
-            Point currentPoint = e.getPoint();
 
-            imageCorner.translate((int)(currentPoint.getX()-previousPoint.getX()),(int)(currentPoint.getY() - previousPoint.getY()));
 
-            previousPoint = currentPoint;
-            repaint();
+    private class DragListener extends MouseMotionAdapter{
+        public void mouseDragged(MouseEvent e) {
+            if(dragValid){
+                Point currentPt = e.getPoint();
+                imageCorner.translate(
+                        (int)(currentPt.getX() - previousPoint.getX()),
+                        (int)(currentPt.getY() - previousPoint.getY())
+                );
+                previousPoint = currentPt;
+                repaint();
+            }
         }
     }
 }
