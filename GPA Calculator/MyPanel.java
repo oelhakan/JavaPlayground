@@ -1,16 +1,17 @@
+package App;
+
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.List;
 
 public class MyPanel extends JPanel implements ActionListener{
 
-    List<String> courseNames;
-    List<Integer> courseCredits;
-    List<Double> courseGrades;
+    ArrayList<String> courseNames;
+    ArrayList<Integer> courseCredits;
+    ArrayList<Double> courseGrades;
     Thread thread;
     JLabel nameLabel;
     JLabel creditLabel;
@@ -18,17 +19,19 @@ public class MyPanel extends JPanel implements ActionListener{
     JTextField nameField;
     JTextField creditField;
     JTextField gradeField;
-    JButton calculateButton;
     JButton addCourseButton;
     JButton resetButton;
     JLabel message;
 
+    DisplayPanel displayPanel;
 
     double result = 0;
     int tempInt = 0;
     double tempDouble = 0;
 
-    MyPanel() {
+    MyPanel(DisplayPanel displayPanel) {
+
+        this.displayPanel = displayPanel;
 
         message = new JLabel();
         message.setHorizontalAlignment(JLabel.CENTER);
@@ -80,9 +83,6 @@ public class MyPanel extends JPanel implements ActionListener{
         addCourseButton = new JButton("Add Course");
         addCourseButton.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         addCourseButton.addActionListener(this);
-        calculateButton = new JButton("Calculate GPA");
-        calculateButton.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-        calculateButton.addActionListener(this);
 
         //spacing and adding the elements
         this.add(Box.createRigidArea(new Dimension(0,20)));
@@ -100,11 +100,10 @@ public class MyPanel extends JPanel implements ActionListener{
         this.add(Box.createRigidArea(new Dimension(0,20)));
         this.add(addCourseButton);
         this.add(Box.createRigidArea(new Dimension(0,5)));
-        this.add(calculateButton);
-        this.add(Box.createRigidArea(new Dimension(0,5)));
         this.add(resetButton);
         this.add(Box.createRigidArea(new Dimension(0,30)));
         this.add(message);
+
         this.setPreferredSize(new Dimension(500, 500));
         this.setBackground(new Color(0xEED2CC));
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
@@ -121,11 +120,6 @@ public class MyPanel extends JPanel implements ActionListener{
         return tempDouble/tempInt;
     }
 
-    //create labels to display on the table
-    public void createLabel(){
-
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) throws NumberFormatException {
 
@@ -133,9 +127,11 @@ public class MyPanel extends JPanel implements ActionListener{
 
             //add items from the textFields to lists
             String tempText = nameField.getText();
+            int tempCredit = Integer.parseInt(creditField.getText());
+            double tempGrade = Double.parseDouble(gradeField.getText());
             courseNames.add(tempText);
-            courseCredits.add(Integer.parseInt(creditField.getText()));
-            courseGrades.add(Double.parseDouble(gradeField.getText()));
+            courseCredits.add(tempCredit);
+            courseGrades.add(tempGrade);
 
             //set textFields to empty
             nameField.setText("");
@@ -143,7 +139,6 @@ public class MyPanel extends JPanel implements ActionListener{
             gradeField.setText("");
 
             //display a message for 3 seconds
-
             thread = new Thread();
             thread.start();
             message.setText("Course Added Successfully!");
@@ -151,15 +146,8 @@ public class MyPanel extends JPanel implements ActionListener{
             timer.setRepeats(false);
             timer.start();
 
-
-        }
-
-        //calculate the GPA, initialize the display panel
-        //to display the courses names-credits-results and the gpa
-        //as a table
-        if(e.getSource().equals(calculateButton)){
-            result = calculateGPA();
-            message.setText(result + "");
+            //add to table panel
+            displayPanel.setLabelText(courseNames,courseCredits,courseGrades,calculateGPA());
         }
 
         //clear the lists,text fields and the message
@@ -168,6 +156,9 @@ public class MyPanel extends JPanel implements ActionListener{
             courseNames.clear();
             courseGrades.clear();
             courseCredits.clear();
+            tempDouble = 0;
+            tempInt = 0;
+            displayPanel.resetDisplay();
             nameField.setText("");
             creditField.setText("");
             gradeField.setText("");
